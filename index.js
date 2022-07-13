@@ -30,6 +30,19 @@ async function run() {
     const bookingCollection = client
       .db("doctors_portal")
       .collection("bookings");
+    const userCollection = client.db("doctors_portal").collection("users");
+
+    /* 
+
+      * API Naming Convention
+      *app.get (/booking) --> get all bookings in this collection. or get more than one or by filter  
+      *app.get (/booking/:id) --> get a specific booking  
+      *app.post (/booking) --> add a new booking  
+      *app.patch (/booking/:id) --> 
+      *app.put (/booking/:id) --> upsert ==> update (if exists) or insert (if doesn't exist).
+      *app.delete (/booking/:id) --> delete from the database
+      
+      */
 
     /* 
 
@@ -94,9 +107,11 @@ async function run() {
       res.send(bookings);
     });
 
-    /*
-     * post data
-     */
+    /* 
+
+      * POST
+      
+      */
 
     app.post("/booking", async (req, res) => {
       const booking = req.body;
@@ -111,6 +126,24 @@ async function run() {
       }
       const result = await bookingCollection.insertOne(booking);
       return res.send({ success: true, result });
+    });
+
+    /* 
+
+      *PUT
+      
+      */
+
+    app.put("/user/:email", async (req, res) => {
+      const user = req.body;
+      const email = req.params.email;
+      const filter = { email: email };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: user,
+      };
+      const result = await userCollection.updateOne(filter, updateDoc, options);
+      res.send(result);
     });
   } finally {
   }
